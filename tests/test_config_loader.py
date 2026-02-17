@@ -60,7 +60,7 @@ def test_load_configurations_loads_only_valid_oftl_keys(monkeypatch):
     monkeypatch.setenv("OFTL_SERVICE_TIMEOUT", "30")
     monkeypatch.setenv("OFTL_API_KEY_SECRET", "encrypted-value")
     monkeypatch.setenv("OFTL_A_", "invalid")
-    monkeypatch.setenv("OFTL_a_B", "invalid")
+    monkeypatch.setenv("OFTL_A-B", "invalid")
     monkeypatch.setenv("OTHER_PREFIX_VALUE", "ignored")
 
     decrypt_mock = Mock(return_value="decrypted-value")
