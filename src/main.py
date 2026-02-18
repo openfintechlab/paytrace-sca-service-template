@@ -1,13 +1,5 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 """
- ██████  ██████  ███████ ███    ██ ███████ ██ ███    ██ ████████ ███████  ██████ ██   ██ ██       █████  ██████  
-██    ██ ██   ██ ██      ████   ██ ██      ██ ████   ██    ██    ██      ██      ██   ██ ██      ██   ██ ██   ██ 
-██    ██ ██████  █████   ██ ██  ██ █████   ██ ██ ██  ██    ██    █████   ██      ███████ ██      ███████ ██████  
-██    ██ ██      ██      ██  ██ ██ ██      ██ ██  ██ ██    ██    ██      ██      ██   ██ ██      ██   ██ ██   ██ 
- ██████  ██      ███████ ██   ████ ██      ██ ██   ████    ██    ███████  ██████ ██   ██ ███████ ██   ██ ██████  
-                                                                                                                 
-                                                                                                                 
-
 Copyright 2026-2028 openfintechlab.com, Inc. All rights reserved.
 Licenses: LICENSE.md
 Description: Service Template / starter code for PayTrace SCA Service build on fastapi.
@@ -15,15 +7,17 @@ Reference: https://github.com/openfintechlab/pytrace-backlogs/issues/12
 """
 
 from fastapi import FastAPI
+from routes.Routes import Routes
 from utilities.Logging import Logging
 import uvicorn
 
 app = FastAPI()
+app.include_router(Routes().router)
 
 
-@app.get("/")
-async def root() -> dict[str, str]:
-    return {"status": "ok"}
+# @app.get("/")
+# async def root() -> dict[str, str]:
+#     return {"status": "ok"}
 
 
 if __name__ == "__main__":
