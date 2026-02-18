@@ -53,8 +53,21 @@ class Routes:
 
         @self.public_router.get("/_healthz")
         async def healthz() -> dict[str, str]:
-            return {"status": "ok"}
+            return self.route_get_healthz()
 
         @self.public_router.get("/_probe")
         async def probe() -> dict[str, str]:
-            return {"status": "ok"}
+            return self.route_get_probe()
+    
+
+    @classmethod
+    def route_get_healthz(self) -> dict[str, str]:
+        """Returns the health status."""
+        # TODO! Write code to perform health check of the solution
+        return {"status": "ok"}
+    
+    @classmethod
+    def route_get_probe(self) -> dict[str, str]:
+        """Returns the probe status."""
+        # TODO! Write code to perform probe check of the solution
+        return {"status": "ok"}

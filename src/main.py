@@ -17,11 +17,6 @@ app.include_router(routes.router)
 app.include_router(routes.public_router)
 
 
-# @app.get("/")
-# async def root() -> dict[str, str]:
-#     return {"status": "ok"}
-
-
 if __name__ == "__main__":
     Logging.info("Starting PayTrace SCA Service...")
     uvicorn.run(app, host="0.0.0.0", port=8081)
