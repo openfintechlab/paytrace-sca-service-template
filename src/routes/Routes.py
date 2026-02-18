@@ -8,11 +8,10 @@ Reference: https://github.com/openfintechlab/pytrace-backlogs/issues/12
 
 from __future__ import annotations
 
-import os
-
 from fastapi import APIRouter
 
 from utilities import ConfigLoader
+from utilities.Logging import Logging
 
 
 class Routes:
@@ -21,6 +20,7 @@ class Routes:
     def __init__(self) -> None:
         self.prefix = self._build_prefix()
         self.router = APIRouter(prefix=self.prefix)
+        self.public_router = APIRouter()
         self._register_routes()
 
     @staticmethod
@@ -35,13 +35,10 @@ class Routes:
         return value.rstrip("/")
 
     @classmethod
-    def _build_prefix(cls) -> str:
-        context_root = ConfigLoader.get(
-            "OFTL_SCA_CONTEXT_ROOT", os.getenv("OFTL_SCA_CONTEXT_ROOT", "")
-        )
-        version = ConfigLoader.get(
-            "OFTL_SCA_VERSION", os.getenv("OFTL_SCA_VERSION", "")
-        )
+    def _build_prefix(cls) -> str:            
+        context_root = ConfigLoader.get("OFTL_SCA_CONTEXT_ROOT")        
+        version = ConfigLoader.get("OFTL_SCA_VERSION")
+        Logging.info(f"Building routes from configuration with context root: [{context_root}] and version: [{version}].")
 
         context_root = cls._normalize_segment(str(context_root)) if context_root else ""
         version = str(version).strip() if version else ""
@@ -54,10 +51,10 @@ class Routes:
         async def root() -> dict[str, str]:
             return {"status": "ok"}
 
-        @self.router.get("/_healthz")
+        @self.public_router.get("/_healthz")
         async def healthz() -> dict[str, str]:
             return {"status": "ok"}
 
-        @self.router.get("/_probe")
+        @self.public_router.get("/_probe")
         async def probe() -> dict[str, str]:
             return {"status": "ok"}

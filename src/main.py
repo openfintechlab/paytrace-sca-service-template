@@ -12,7 +12,9 @@ from utilities.Logging import Logging
 import uvicorn
 
 app = FastAPI()
-app.include_router(Routes().router)
+routes = Routes()
+app.include_router(routes.router)
+app.include_router(routes.public_router)
 
 
 # @app.get("/")
