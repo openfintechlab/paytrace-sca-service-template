@@ -38,8 +38,6 @@ class Routes:
     def _build_prefix(cls) -> str:            
         context_root = ConfigLoader.get("OFTL_SCA_CONTEXT_ROOT")        
         version = ConfigLoader.get("OFTL_SCA_VERSION")
-        Logging.info(f"Building routes from configuration with context root: [{context_root}] and version: [{version}].")
-
         context_root = cls._normalize_segment(str(context_root)) if context_root else ""
         version = str(version).strip() if version else ""
         version_segment = f"/v{version}" if version else ""
