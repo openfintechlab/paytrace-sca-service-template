@@ -6,5 +6,6 @@ dependencies = [
   "uvicorn",
   "pydantic",
   "environs",
-  "pytest"
+  "pytest",
+  "httpx>=0.28.1",
 ]
