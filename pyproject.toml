@@ -6,6 +6,8 @@ dependencies = [
   "uvicorn",
   "pydantic",
   "environs",
+  "sqlalchemy",
+  "psycopg2-binary",
   "pytest",
   "httpx>=0.28.1",
 ]

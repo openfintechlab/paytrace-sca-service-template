@@ -10,6 +10,7 @@ from fastapi                import FastAPI
 from routes.Routes          import Routes
 from utilities.Logging      import Logging
 from utilities.ConfigLoader import ConfigLoader 
+from utilities.DBHelper     import DBHelper
 from contextlib             import asynccontextmanager
 
 
@@ -17,7 +18,23 @@ import uvicorn
 import sys
 
 
-app         = FastAPI()
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    try:        
+        result = DBHelper.initialize_connection()        
+        if not result:
+            Logging.info("Database connection is not established.")
+            Logging.error("Failed to initialize database connection during startup.")
+            raise RuntimeError("Database initialization failed. Service startup aborted.")
+    except Exception as ex:
+        Logging.info("Database connection is not established.")
+        Logging.error(f"Database startup error: {ex}")
+        raise
+    yield
+    DBHelper.dispose_connection()
+
+
+app         = FastAPI(lifespan=lifespan)
 routes      = Routes()
 
 # Initializing the FastAPI app and loading routes from the Routes class.
@@ -41,6 +58,8 @@ def displayBanner():
     Logging.info(f"Host: {ConfigLoader.get('OFTL_SCA_HOST', _DEFAULT_HOST)}")
     Logging.info(f"Port: {ConfigLoader.get('OFTL_SCA_PORT', _DEFAULT_PORT)}")
     Logging.info(f"Log Level: {ConfigLoader.get('OFTL_LOG_LEVEL', _DEFAULT_LOG_LEVEL)}")
+    Logging.info(f"Database: {ConfigLoader.get('OFTL_POSTGRESDB_NAME', "N/A")}")
+    Logging.info(f"Database Host: {ConfigLoader.get('OFTL_POSTGRESDB_HOST', "N/A")}")
     Logging.info("===============================================")
 
     pass
