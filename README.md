@@ -1,54 +1,163 @@
-# paytrace-sca-service-template
-Service Template for Service Component exposing APIs
+# PayTrace SCA Service Template
 
-## Routes and Environment
+## Introduction
 
-Routes are defined in `src/routes/Routes.py` and registered in `src/main.py` with `app.include_router(Routes().router)`. The route class builds a common prefix for every endpoint using two environment variables:
+This template is a FastAPI-based starter for building the PayTrace SCA service. It includes:
 
-- `OFTL_SCA_CONTEXT_ROOT` for the base context path (example: `/paytrace/sca`)
-- `OFTL_SCA_VERSION` for the API version (example: `1` becomes `/v1`)
+- Service bootstrap with FastAPI lifecycle hooks
+- Centralized configuration loading from environment variables and `.env`
+- PostgreSQL connection initialization through SQLAlchemy
+- Base health/probe routes
+- Test scaffolding with `pytest`
 
-Combined, the prefix becomes `${OFTL_SCA_CONTEXT_ROOT}/v${OFTL_SCA_VERSION}`. The boilerplate includes:
+## Project Structure
 
-- `GET /` (root status)
-- `GET /_healthz`
-- `GET /_probe`
-
-Example `.env`:
-
-```dotenv
-OFTL_SCA_CONTEXT_ROOT=/paytrace/sca
-OFTL_SCA_VERSION=1
+```text
+src/
+  main.py                 # Service entrypoint and startup lifecycle
+  routes/Routes.py        # API route registration and default endpoints
+  utilities/ConfigLoader.py
+  utilities/DBHelper.py
+  utilities/Logging.py
+tests/
+  test_routes.py
+  test_config_loader.py
 ```
 
-Example curl:
+## Prerequisites
+
+- Python 3.11+ (recommended)
+- `uv` installed
+- PostgreSQL available for runtime startup checks
+
+## Quick Start
+
+### 1. Create local environment file
+
+Copy the template environment file and edit values:
 
 ```bash
-curl http://localhost:8081/paytrace/sca/v1/
+cp .env.example .env
 ```
 
-## Install dependencies
+Essential variables should be copied from `.env.example` and updated for your environment.
+
+### 2. Fetch dependencies with `uv`
+
+From the template root:
+
+```bash
+uv sync
+```
+
+If you want to install as an editable package instead:
 
 ```bash
 uv pip install -e .
 ```
 
-## Run test cases
-
-Install test dependency:
+### 3. Run the service
 
 ```bash
-uv pip install pytest
+uv run python src/main.py
 ```
 
-Run only `ConfigLoader` tests:
+## Configuration Reference
+
+The core uses the following environment variables:
+
+### Service Routing
+
+- `OFTL_SCA_CONTEXT_ROOT`: Base API path (example: `/sca`)
+- `OFTL_SCA_VERSION`: API version segment (example: `1`, exposed as `/v1`)
+- `OFTL_SCA_HOST`: Bind host for Uvicorn (default fallback in code: `0.0.0.0`)
+- `OFTL_SCA_PORT`: Bind port for Uvicorn (default fallback in code: `8081`)
+
+Final route prefix is:
+
+```text
+${OFTL_SCA_CONTEXT_ROOT}/v${OFTL_SCA_VERSION}
+```
+
+Example with defaults in `.env.example`:
+
+```text
+/sca/v1
+```
+
+### Logging
+
+- `OFTL_LOG_LEVEL`: Logger/Uvicorn log level (`INFO`, `DEBUG`, etc.)
+- `OFTL_LOG_FORMAT`: Python logging format string
+
+### Database (Required for startup DB initialization)
+
+- `OFTL_POSTGRESDB_USERNAME`
+- `OFTL_POSTGRESDB_PASSWORD`
+- `OFTL_POSTGRESDB_HOST`
+- `OFTL_POSTGRESDB_PORT`
+- `OFTL_POSTGRESDB_NAME`
+
+Optional:
+
+- `OFTL_POSTGRESDB_POOLSIZE`: SQLAlchemy pool size (default: `10`)
+
+## Default Routes
+
+Registered in `src/routes/Routes.py`:
+
+- `GET /` under the versioned service prefix (for example: `GET /sca/v1/`)
+- `GET /_healthz` (public)
+- `GET /_probe` (public)
+
+Quick check:
 
 ```bash
-python -m pytest tests/test_config_loader.py -v
+curl http://localhost:8081/sca/v1/
+curl http://localhost:8081/_healthz
+curl http://localhost:8081/_probe
 ```
+
+## Create a New Route
+
+Add new route handlers inside `Routes._register_routes` in `src/routes/Routes.py`.
+
+Example:
+
+```python
+@self.router.get("/transactions/ping")
+async def transactions_ping() -> dict[str, str]:
+    return {"service": "transactions", "status": "ok"}
+```
+
+With `OFTL_SCA_CONTEXT_ROOT=/sca` and `OFTL_SCA_VERSION=1`, this route becomes:
+
+```text
+GET /sca/v1/transactions/ping
+```
+
+## Testing
 
 Run all tests:
 
 ```bash
-python -m pytest tests -v
+uv run pytest tests -v
 ```
+
+Run specific tests:
+
+```bash
+uv run pytest tests/test_config_loader.py -v
+uv run pytest tests/test_routes.py -v
+```
+
+## Major Libraries Used
+
+- `fastapi`: API framework
+- `uvicorn`: ASGI server
+- `pydantic`: data validation (FastAPI ecosystem)
+- `environs`: environment variable parsing/loading
+- `sqlalchemy`: database engine and ORM utilities
+- `psycopg2-binary`: PostgreSQL driver
+- `pytest`: test framework
+- `httpx`: HTTP client used in test/runtime scenarios
