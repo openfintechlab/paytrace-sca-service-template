@@ -12,6 +12,7 @@ from utilities.Logging      import Logging
 from utilities.ConfigLoader import ConfigLoader 
 from utilities.DBHelper     import DBHelper
 from contextlib             import asynccontextmanager
+from uvicorn.config         import LOGGING_CONFIG
 
 
 import uvicorn
@@ -69,17 +70,18 @@ if __name__ == "__main__":
     try:
         displayBanner()
         # Setting log cofig and format
-        log_config = uvicorn.config.LOGGING_CONFIG
+        
+        log_config = LOGGING_CONFIG
         log_config["formatters"]["default"]["fmt"] = ConfigLoader.get("OFTL_LOG_FORMAT", _DEFAULT_LOG_FORMAT)
         log_config["handlers"]["default"]["level"] = ConfigLoader.get("OFTL_LOG_LEVEL", _DEFAULT_LOG_LEVEL)
-        uvicorn.config.LOGGING_CONFIG = log_config
         # END;
         uvicorn.run(app, 
                     host=ConfigLoader.get("OFTL_SCA_HOST", _DEFAULT_HOST),
-                    port=int(ConfigLoader.get("OFTL_SCA_PORT", _DEFAULT_PORT)),                                               
+                    port=int(ConfigLoader.get("OFTL_SCA_PORT", _DEFAULT_PORT)),
+                    log_config=log_config,
                 )
         
     except Exception as e:
         Logging.error(f"Error starting SCA Service")  
-        Logging.error(e)
+        Logging.error(str(e))
         sys.exit(91)
