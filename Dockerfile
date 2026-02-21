@@ -1,9 +1,9 @@
 # syntax=docker/dockerfile:1
 # 
-# Copyright 2020-2023 SpireTech, Inc. All rights reserved.
+# Copyright 2026-2030 Openfintechlab, Inc. All rights reserved.
 # Description: 
 # Generic Dockerfile for python application
-# Ref: https://hub.docker.com/_/python
+# Ref: https://hub.docker.com/hardened-images/catalog/dhi/python
 
 
 ## -----------------------------------------------------
