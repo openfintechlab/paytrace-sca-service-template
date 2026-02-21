@@ -62,6 +62,57 @@ uv pip install -e .
 uv run python src/main.py
 ```
 
+## Run with Docker
+
+### 1. Build the container image
+
+From the template root (`paytrace-sca-service-template`):
+
+```bash
+docker build -t pytrace-unittest-cimage:latest .
+```
+
+### 2. Run the container
+
+Use the following command pattern to run the service with required environment variables:
+
+```bash
+docker run -d \
+  --name paytrace-unittest-cimage01 \
+  -p 8081:8081 \
+  -e OFTL_SCA_CONTEXT_ROOT="/sca" \
+  -e OFTL_SCA_VERSION="1" \
+  -e OFTL_SCA_HOST="0.0.0.0" \
+  -e OFTL_SCA_PORT="8081" \
+  -e OFTL_LOG_LEVEL="INFO" \
+  -e OFTL_LOG_FORMAT="[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s" \
+  -e OFTL_POSTGRESDB_USERNAME="admin" \
+  -e OFTL_POSTGRESDB_PASSWORD="[CHANGE ME]" \
+  -e OFTL_POSTGRESDB_HOST="host.docker.internal" \
+  -e OFTL_POSTGRESDB_PORT="5432" \
+  -e OFTL_POSTGRESDB_NAME="paytrace" \
+  pytrace-unittest-cimage:latest
+```
+
+Or use a `.env` file with `--env-file`:
+
+```bash
+docker run -d \
+  --name paytrace-unittest-cimage01 \
+  -p 8081:8081 \
+  --env-file .env \
+  pytrace-unittest-cimage:latest
+```
+
+### 3. Verify container and endpoints
+
+```bash
+docker logs -f paytrace-unittest-cimage01
+curl http://localhost:8081/sca/v1/
+curl http://localhost:8081/_healthz
+curl http://localhost:8081/_probe
+```
+
 ## Configuration Reference
 
 The core uses the following environment variables:
