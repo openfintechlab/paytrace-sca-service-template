@@ -11,6 +11,7 @@ from routes.Routes          import Routes
 from utilities.Logging      import Logging
 from utilities.ConfigLoader import ConfigLoader 
 from utilities.DBHelper     import DBHelper
+from utilities.HeaderValidationMiddleware import HeaderValidationMiddleware
 from contextlib             import asynccontextmanager
 from uvicorn.config         import LOGGING_CONFIG
 
@@ -37,6 +38,7 @@ async def lifespan(_: FastAPI):
 
 app         = FastAPI(lifespan=lifespan)
 routes      = Routes()
+app.add_middleware(HeaderValidationMiddleware)
 
 # Initializing the FastAPI app and loading routes from the Routes class.
 app.include_router(routes.router)
