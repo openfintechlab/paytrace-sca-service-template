@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Copyright 2026-2028 openfintechlab.com, Inc. All rights reserved.
 Licenses: LICENSE.md
@@ -11,7 +11,6 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from utilities import ConfigLoader
-from utilities.Logging import Logging
 
 
 class Routes:
@@ -35,8 +34,8 @@ class Routes:
         return value.rstrip("/")
 
     @classmethod
-    def _build_prefix(cls) -> str:            
-        context_root = ConfigLoader.get("OFTL_SCA_CONTEXT_ROOT")        
+    def _build_prefix(cls) -> str:
+        context_root = ConfigLoader.get("OFTL_SCA_CONTEXT_ROOT")
         version = ConfigLoader.get("OFTL_SCA_VERSION")
         context_root = cls._normalize_segment(str(context_root)) if context_root else ""
         version = str(version).strip() if version else ""
@@ -56,16 +55,15 @@ class Routes:
         @self.public_router.get("/_probe")
         async def probe() -> dict[str, str]:
             return self.route_get_probe()
-    
 
-    @classmethod
-    def route_get_healthz(self) -> dict[str, str]:
+    @staticmethod
+    def route_get_healthz() -> dict[str, str]:
         """Returns the health status."""
         # TODO! Write code to perform health check of the solution
         return {"status": "ok"}
-    
-    @classmethod
-    def route_get_probe(self) -> dict[str, str]:
+
+    @staticmethod
+    def route_get_probe() -> dict[str, str]:
         """Returns the probe status."""
         # TODO! Write code to perform probe check of the solution
         return {"status": "ok"}
