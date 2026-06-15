@@ -2,7 +2,11 @@
 
 ## Introduction
 
-This template is a FastAPI-based starter for building the PayTrace SCA service. It includes:
+`paytrace-sca-service-template` is the reusable FastAPI starter for PayTrace API services. It provides the common bootstrap pattern for route registration, configuration loading, logging, PostgreSQL startup validation, and public health/probe endpoints.
+
+In the PayTrace architecture, this template is the foundation for HTTP-facing services that need to follow the standard PayTrace route prefix, response envelope, environment naming, and operational health-check conventions. New SCA services should start here so they inherit consistent service shape before adding domain-specific routes.
+
+The implementation includes:
 
 - Service bootstrap with FastAPI lifecycle hooks
 - Centralized configuration loading from environment variables and `.env`
@@ -42,7 +46,7 @@ cp .env.example .env
 
 Essential variables should be copied from `.env.example` and updated for your environment.
 
-### 2. Fetch dependencies with `uv`
+### 2. Install dependencies
 
 From the template root:
 
@@ -62,15 +66,38 @@ uv pip install -e .
 uv run python src/main.py
 ```
 
-## Run with Docker
+## Docker
 
 ### 1. Build the container image
 
 From the template root (`paytrace-sca-service-template`):
 
 ```bash
-docker build -t pytrace-unittest-cimage:latest .
+docker build -t paytrace-sca-service-template:latest .
 ```
+
+The Dockerfile uses build arguments for its base images. Defaults are safe for local builds:
+
+```text
+DOCKER_PYTHON_BUILDER_IMAGE=dhi.io/python:3-debian13-sfw-dev
+DOCKER_PYTHON_RUNTIME_IMAGE=dhi.io/python:3
+```
+
+Override them when needed:
+
+```bash
+docker build \
+  --build-arg DOCKER_PYTHON_BUILDER_IMAGE=dhi.io/python:3-debian13-sfw-dev \
+  --build-arg DOCKER_PYTHON_RUNTIME_IMAGE=dhi.io/python:3 \
+  -t paytrace-sca-service-template:latest .
+```
+
+The GitHub Docker build workflow reads the same values from GitHub Actions variables named `DOCKER_PYTHON_BUILDER_IMAGE` and `DOCKER_PYTHON_RUNTIME_IMAGE`, falling back to the defaults above when the variables are not set. Published images use the Docker Hub repository `openfintechlab/paytrace-sca-service-template`.
+
+Commit message controls:
+
+- `[build docker]` builds the image.
+- `[buildandpush docker]` builds and pushes the image.
 
 ### 2. Run the container
 
@@ -78,7 +105,7 @@ Use the following command pattern to run the service with required environment v
 
 ```bash
 docker run -d \
-  --name paytrace-unittest-cimage01 \
+  --name paytrace-sca-service-template \
   -p 8081:8081 \
   -e OFTL_SCA_CONTEXT_ROOT="/sca" \
   -e OFTL_SCA_VERSION="1" \
@@ -91,27 +118,36 @@ docker run -d \
   -e OFTL_POSTGRESDB_HOST="host.docker.internal" \
   -e OFTL_POSTGRESDB_PORT="5432" \
   -e OFTL_POSTGRESDB_NAME="paytrace" \
-  pytrace-unittest-cimage:latest
+  paytrace-sca-service-template:latest
 ```
 
 Or use a `.env` file with `--env-file`:
 
 ```bash
 docker run -d \
-  --name paytrace-unittest-cimage01 \
+  --name paytrace-sca-service-template \
   -p 8081:8081 \
   --env-file .env \
-  pytrace-unittest-cimage:latest
+  paytrace-sca-service-template:latest
 ```
 
 ### 3. Verify container and endpoints
 
 ```bash
-docker logs -f paytrace-unittest-cimage01
+docker logs -f paytrace-sca-service-template
 curl http://localhost:8081/sca/v1/
 curl http://localhost:8081/_healthz
 curl http://localhost:8081/_probe
 ```
+
+## Service Processing Flow
+
+1. `src/main.py` loads `OFTL_*` configuration and initializes logging.
+2. The FastAPI application starts with lifecycle hooks.
+3. Startup validates PostgreSQL connectivity through `DBHelper`.
+4. `src/routes/Routes.py` registers the versioned root route.
+5. Public health endpoints remain available at `/_healthz` and `/_probe`.
+6. Uvicorn serves the API on `OFTL_SCA_HOST:OFTL_SCA_PORT`.
 
 ## Configuration Reference
 
@@ -153,7 +189,7 @@ Optional:
 
 - `OFTL_POSTGRESDB_POOLSIZE`: SQLAlchemy pool size (default: `10`)
 
-## Default Routes
+## API Routes
 
 Registered in `src/routes/Routes.py`:
 
